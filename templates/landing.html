@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindWellAI - Your Mental Health Companion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body>
+    <div class="landing-container">
+        <nav class="navbar">
+            <div class="nav-brand">HS</div>
+            <div class="nav-links">
+                <button class="nav-btn" id="signin-nav-btn">Sign In</button>
+                <button class="nav-btn primary" id="signup-nav-btn">Sign Up</button>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">AI Mental Health Support</span>
+                </h1>
+                <h2 class="hero-subtitle">Your AI-Powered Mental Health Companion</h2>
+                <p class="hero-description">
+                    A safe, confidential space to share your feelings, get emotional support, 
+                    and access personalized mental wellness exercises. Available 24/7 to listen and support you.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" id="start-conversation-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Start Conversation
+                    </button>
+                    <button class="btn btn-secondary" id="learn-more-btn">Learn More</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-card card-1">
+                    <span class="emoji">😌</span>
+                    <span>Emotional Support</span>
+                </div>
+                <div class="floating-card card-2">
+                    <span class="emoji">🎧</span>
+                    <span>Voice Interaction</span>
+                </div>
+                <div class="floating-card card-3">
+                    <span class="emoji">💡</span>
+                    <span>Helpful Exercises</span>
+                </div>
+                <div class="floating-card card-4">
+                    <span class="emoji">🔒</span>
+                    <span>Confidential</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <h3 class="features-title">Why Choose AI Mental Health Support?</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h4>AI-Powered Support</h4>
+                    <p>Advanced emotional intelligence to understand and respond to your feelings with empathy</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎤</div>
+                    <h4>Voice & Text</h4>
+                    <p>Express yourself through voice or text - whatever feels more comfortable for you</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💭</div>
+                    <h4>Personalized Care</h4>
+                    <p>Tailored responses and exercises based on your emotional state and needs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧘</div>
+                    <h4>Wellness Exercises</h4>
+                    <p>Breathing exercises, meditation tips, and self-care suggestions for each emotion</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h4>Mood Tracking</h4>
+                    <p>Understand your emotional patterns with real-time sentiment analysis</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌙</div>
+                    <h4>24/7 Available</h4>
+                    <p>Always here when you need support, day or night</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>⚠️ MindWellAI provides emotional support but is not a replacement for professional mental health care.</p>
+            <p>If you're in crisis, please contact emergency services or a crisis helpline.</p>
+        </footer>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="auth-modal hidden">
+        <div class="auth-modal-content">
+            <button class="close-auth-modal" id="close-signin">&times;</button>
+            <h2>Welcome Back!</h2>
+            <p class="auth-subtitle">Sign in to continue your journey</p>
+            <form id="signin-form">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="auth-btn">Sign In</button>
+                <p class="auth-switch">Don't have an account? <a href="#" id="switch-to-signup">Sign up</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div id="signup-modal" class="auth-modal hidden">
+        <div class="auth-modal-content">
+            <button class="close-auth-modal" id="close-signup">&times;</button>
+            <h2>Join MindWellAI</h2>
+            <p class="auth-subtitle">Start your mental wellness journey</p>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="auth-btn">Sign Up</button>
+                <p class="auth-switch">Already have an account? <a href="#" id="switch-to-signin">Sign in</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='landing.js') }}"></script>
+</body>
+</html>

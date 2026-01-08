@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mental Health Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Name Modal -->
+    <div id="name-modal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome! 👋</h2>
+            <p>What's your name? (This helps me personalize our conversation)</p>
+            <input type="text" id="name-input" placeholder="Enter your name..." maxlength="50">
+            <button id="name-submit" class="modal-btn">Continue</button>
+            <button id="name-skip" class="modal-btn-secondary">Skip</button>
+        </div>
+    </div>
+
+    <!-- Exercises Modal -->
+    <div id="exercises-modal" class="modal hidden">
+        <div class="modal-content exercises-content">
+            <button class="close-modal" id="close-exercises">&times;</button>
+            <h2>💡 Helpful Exercises & Suggestions</h2>
+            <div id="exercises-container"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🧠 AI Mental Health Support</h1>
+                <p class="tagline">A safe space to share your feelings</p>
+            </div>
+            <div class="header-right">
+                <button id="signout-btn" class="signout-btn">Sign Out</button>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div id="chat-messages" class="chat-messages">
+                <div class="bot-message">
+                    <div class="message-bubble bot">
+                        <p>Hello! I'm here to listen and support you. How are you feeling today?</p>
+                        <span class="timestamp">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emotion-display" id="emotion-display">
+                <div class="emotion-indicator">
+                    <span class="emotion-label">Current mood:</span>
+                    <span class="emotion-value" id="current-emotion">Neutral</span>
+                    <div class="intensity-bar">
+                        <div class="intensity-fill" id="intensity-fill" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="chat-form" class="chat-input-container">
+                <button type="button" id="voice-btn" class="voice-btn" title="Voice input">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+                <textarea 
+                    id="user-input" 
+                    placeholder="Share what's on your mind or use voice..." 
+                    rows="2"
+                    required
+                ></textarea>
+                <button type="submit" id="send-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="actions">
+                <button id="exercises-btn" class="exercises-btn">💡 Get Helpful Exercises</button>
+                <button id="clear-btn" class="clear-btn">Clear Conversation</button>
+                <label class="toggle-label">
+                    <input type="checkbox" id="voice-output-toggle" checked>
+                    <span>Voice Output</span>
+                </label>
+            </div>
+        </div>
+
+        <footer>
+            <p class="disclaimer">
+                ⚠️ This chatbot provides emotional support but is not a replacement for professional mental health care. 
+                If you're in crisis, please contact emergency services or a crisis helpline.
+            </p>
+        </footer>
+    </div>
+
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
