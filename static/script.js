@@ -326,11 +326,17 @@ chatForm.addEventListener('submit', async (e) => {
             body: JSON.stringify({ message }),
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to get response');
+        const data = await response.json();
+        
+        // Check for quota exceeded error
+        if (data.quota_exceeded || response.status === 503) {
+            showQuotaWarning();
         }
         
-        const data = await response.json();
+        if (data.error) {
+            addMessage(data.error, 'bot');
+            return;
+        }
         
         addMessage(data.response, 'bot', data.sentiment.emotions);
         
@@ -348,6 +354,17 @@ chatForm.addEventListener('submit', async (e) => {
         userInput.focus();
     }
 });
+
+function showQuotaWarning() {
+    // Check if warning already exists
+    if (document.getElementById('quota-warning')) return;
+    
+    const warning = document.createElement('div');
+    warning.id = 'quota-warning';
+    warning.style.cssText = 'background: #ff6b6b; color: white; padding: 12px 20px; text-align: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; font-size: 14px;';
+    warning.innerHTML = '⚠️ Service temporarily limited: OpenAI API quota exceeded. Please contact the administrator. <button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 12px; margin-left: 10px; cursor: pointer; border-radius: 4px;">Dismiss</button>';
+    document.body.prepend(warning);
+}
 
 userInput.addEventListener('input', function() {
     this.style.height = 'auto';

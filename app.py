@@ -1,7 +1,7 @@
 import os
 import sys
 from flask import Flask, render_template, request, jsonify, session
-from openai import OpenAI
+from groq import Groq
 from datetime import datetime
 import secrets
 import uuid
@@ -17,7 +17,8 @@ import logging
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 app.logger.setLevel(logging.DEBUG)
 
-client = OpenAI()
+# Initialize Groq client (free tier available)
+client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
 
 conversation_store = {}
 user_names = {}
@@ -305,11 +306,18 @@ def analyze_message():
         return jsonify({
             'response': bot_response,
             'sentiment': sentiment_result,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'quota_exceeded': 'rate_limit' in sentiment_result.get('context', '').lower() or 'unavailable' in bot_response.lower()
         })
     
     except Exception as e:
         print(f"Error in analyze_message: {str(e)}")
+        error_msg = str(e).lower()
+        if 'rate_limit' in error_msg or '429' in error_msg:
+            return jsonify({
+                'error': 'Service is experiencing high demand. Please try again in a moment.',
+                'quota_exceeded': True
+            }), 503
         return jsonify({'error': 'An error occurred processing your message'}), 500
 
 def analyze_sentiment(message, conversation_history):
@@ -339,13 +347,13 @@ Respond in this exact JSON format:
                 context += f"{role}: {msg['content']}\n"
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": system_prompt + "\n\nIMPORTANT: Respond ONLY with valid JSON, no other text."},
                 {"role": "user", "content": f"Analyze this message:{context}\n\nCurrent message: {message}"}
             ],
             temperature=0.3,
-            response_format={"type": "json_object"}
+            max_tokens=200
         )
         
         import json
@@ -370,8 +378,8 @@ Respond in this exact JSON format:
         # Provide more specific fallback context
         if 'connection' in error_msg.lower() or 'getaddrinfo' in error_msg.lower():
             context = 'Network connection issue - using neutral sentiment'
-        elif 'quota' in error_msg.lower() or '429' in error_msg:
-            context = 'API quota exceeded - using neutral sentiment'
+        elif 'rate_limit' in error_msg.lower() or '429' in error_msg:
+            context = 'Rate limit reached - using neutral sentiment'
         else:
             context = 'Unable to analyze sentiment'
         
@@ -436,22 +444,19 @@ Important guidelines:
 
 Respond in a caring, supportive way that addresses their emotional needs."""
 
-        from typing import cast
-        from openai.types.chat import ChatCompletionMessageParam
-        
-        messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": system_prompt}]
+        messages = [{"role": "system", "content": system_prompt}]
         
         if conversation_history:
             for msg in conversation_history[-6:]:
-                messages.append(cast(ChatCompletionMessageParam, {
+                messages.append({
                     "role": msg['role'],
                     "content": msg['content']
-                }))
+                })
         
         messages.append({"role": "user", "content": user_message})
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama-3.3-70b-versatile",
             messages=messages,
             temperature=0.7,
             max_tokens=300
@@ -469,8 +474,8 @@ Respond in a caring, supportive way that addresses their emotional needs."""
         # Provide more specific fallback based on error type
         if 'connection' in error_msg.lower() or 'getaddrinfo' in error_msg.lower():
             return "I'm experiencing connection issues, but I'm here to support you. Please check your internet connection and try again."
-        elif 'quota' in error_msg.lower() or '429' in error_msg:
-            return "I'm currently unavailable due to service limits. Please try again in a few moments."
+        elif 'quota' in error_msg.lower() or '429' in error_msg or 'rate_limit' in error_msg.lower():
+            return "I'm temporarily unavailable due to high demand. Please try again in a moment. In the meantime, please know that your feelings are valid. If you're in crisis, please reach out to a crisis helpline: 988 (US) or text HOME to 741741."
         
         return "I'm here to listen and support you. Could you tell me more about how you're feeling?"
 
@@ -484,54 +489,13 @@ def clear_conversation():
 
 @app.route('/text-to-speech', methods=['POST'])
 def text_to_speech():
-    try:
-        data = request.json
-        text = data.get('text', '')
-        
-        if not text:
-            return jsonify({'error': 'No text provided'}), 400
-        
-        # Use OpenAI's text-to-speech API
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="nova",  # Warm, empathetic voice
-            input=text
-        )
-        
-        # Stream the audio response
-        from flask import Response
-        import io
-        
-        audio_data = io.BytesIO()
-        for chunk in response.iter_bytes():
-            audio_data.write(chunk)
-        audio_data.seek(0)
-        
-        return Response(audio_data.read(), mimetype='audio/mpeg')
-    
-    except Exception as e:
-        error_msg = str(e)
-        print(f"Error in text-to-speech: {error_msg}")
-        
-        # Check for specific error types
-        if 'quota' in error_msg.lower() or '429' in error_msg:
-            return jsonify({
-                'error': 'Text-to-speech quota exceeded',
-                'fallback': True,
-                'message': 'Using browser voice instead'
-            }), 200
-        elif 'connection' in error_msg.lower() or 'getaddrinfo' in error_msg.lower():
-            return jsonify({
-                'error': 'Network connection issue',
-                'fallback': True,
-                'message': 'Using browser voice instead'
-            }), 200
-        
-        return jsonify({
-            'error': 'Text-to-speech unavailable',
-            'fallback': True,
-            'message': 'Using browser voice instead'
-        }), 200
+    """Text-to-speech endpoint - uses browser speech synthesis as Groq doesn't have TTS"""
+    # Groq doesn't have text-to-speech API, so always use browser fallback
+    return jsonify({
+        'error': 'Using browser voice',
+        'fallback': True,
+        'message': 'Using browser voice instead'
+    }), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
